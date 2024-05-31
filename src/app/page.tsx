@@ -1,5 +1,4 @@
 "use client";
-import { useQueryState } from "nuqs";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -24,8 +23,6 @@ import { FilterJournalists } from "@/components/FilterJournalists";
 import { JournalistsList } from "@/components/JournalistsList";
 
 export default function Home() {
-  const [queryTopic, setQueryTopic] = useQueryState("topic");
-
   // Zustand store state and actions
   const {
     topic,
@@ -59,7 +56,6 @@ export default function Home() {
       setJournalistSources([]);
       setIsLoading(true);
       setError(null);
-      setQueryTopic(values.topic);
       setTopic(values.topic);
       const journalists: any = await perigonService.getJournalistsByTopic(
         values.topic
