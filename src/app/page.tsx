@@ -119,7 +119,11 @@ export default function Home() {
     }
   }
 
-  const isReady = !isLoading && !error && !isNoJournalistsFound;
+  const isReady =
+    !isLoading &&
+    !error &&
+    !isNoJournalistsFound &&
+    journalistSources.length !== 0;
 
   return (
     <main className="flex flex-col items-center justify-between p-4 pb-10">
