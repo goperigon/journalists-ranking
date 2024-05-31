@@ -1,12 +1,7 @@
 "use client";
-import { useQueryState } from "nuqs";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import perigonService from "@/services/perigonService"; // Make sure to adjust the path to your actual imp
-import { useAppStore } from "../stores/appStore"; // Import the Zustand store
-import { Journalist } from "@/types/journalist";
-import { Source } from "@/types/source";
+import Image from "next/image";
+
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -16,29 +11,27 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { JournalistsReachChart } from "@/components/JournalistsReachChart";
 import { Input } from "@/components/ui/input";
-import { FilterJournalists } from "@/components/FilterJournalists";
-import { JournalistsList } from "@/components/JournalistsList";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useQueryState } from "nuqs";
+import perigonService from "@/services/perigonService";
+import { Journalist } from "@/types/journalist";
+import { Source } from "@/types/source";
+import { JournalistsReachChart } from "@/components/JournalistsReachChart";
+import { useState } from "react";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 export default function Home() {
-  const [queryTopic, setQueryTopic] = useQueryState("topic");
+  const [topic, setTopic] = useQueryState("topic");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isNoJournalistsFound, setIsNoJournalistsFound] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Zustand store state and actions
-  const {
-    topic,
-    isLoading,
-    isNoJournalistsFound,
-    error,
-    journalistSources,
-    setTopic,
-    setIsLoading,
-    setIsNoJournalistsFound,
-    setError,
-    setJournalistSources,
-  } = useAppStore();
+  const [journalistSources, setJournalistSources] = useState<
+    { journalist: Journalist; sources: Source[]; reach: number }[]
+  >([]);
 
   const formSchema = z.object({
     topic: z.string().min(2, {
@@ -46,6 +39,7 @@ export default function Home() {
     }),
   });
 
+  // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -59,13 +53,13 @@ export default function Home() {
       setJournalistSources([]);
       setIsLoading(true);
       setError(null);
-      setQueryTopic(values.topic);
       setTopic(values.topic);
       const journalists: any = await perigonService.getJournalistsByTopic(
         values.topic
       );
       const allJournalists: Journalist[] = journalists.results;
 
+      // const fetchSourcesPromises: Map<string, Set<Promise<unknown>>> = new Map();
       const fetchSourcesPromises: Array<Promise<unknown>> = [];
 
       for (const journalist of allJournalists) {
@@ -74,6 +68,7 @@ export default function Home() {
           const fetchSourcePromise = perigonService.getSourceByDomain(
             source.name
           );
+          // setMapValue(fetchSourcesPromises, journalist.id, fetchSourcePromise);
           fetchSourcesPromises.push(fetchSourcePromise);
         });
       }
@@ -123,10 +118,8 @@ export default function Home() {
     }
   }
 
-  const isReady = !isLoading && !error && !isNoJournalistsFound;
-
   return (
-    <main className="flex flex-col items-center justify-between p-4 pb-10">
+    <main className="flex flex-col items-center justify-between p-4">
       <h1 className="font-bold text-4xl mb-10">Journalists Ranking</h1>
       <section className="flex flex-col w-2/3">
         <Form {...form}>
@@ -155,7 +148,6 @@ export default function Home() {
             </div>
           </form>
         </Form>
-        {/* <FilterJournalists /> */}
         <div className="flex flex-col mt-10">
           {!isLoading && !error && isNoJournalistsFound && (
             <p className="text-lg font-semibold text-center text-red-500">
@@ -171,7 +163,6 @@ export default function Home() {
             <JournalistsReachChart journalistSources={journalistSources} />
           )}
         </div>
-        {isReady && <JournalistsList />}
       </section>
     </main>
   );
