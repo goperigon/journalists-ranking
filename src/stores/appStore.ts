@@ -1,14 +1,8 @@
 import { Journalist } from "@/types/journalist";
+import { JournalistSource } from "@/types/journalistSource";
 import { Source } from "@/types/source";
 import { create } from "zustand";
 
-interface JournalistSource {
-  journalist: Journalist;
-  sources: Source[];
-  reach: number;
-}
-
-// Define the types for your store state and actions
 interface AppState {
   topic: string;
   isLoading: boolean;

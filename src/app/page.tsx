@@ -21,8 +21,11 @@ import { JournalistsReachChart } from "@/components/JournalistsReachChart";
 import { Input } from "@/components/ui/input";
 import { FilterJournalists } from "@/components/FilterJournalists";
 import { JournalistsList } from "@/components/JournalistsList";
+import { useQueryState } from "nuqs";
+import { useEffect } from "react";
 
 export default function Home() {
+  const [topicQueryState, setTopicQueryState] = useQueryState("topic");
   // Zustand store state and actions
   const {
     topic,
@@ -46,20 +49,22 @@ export default function Home() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      topic: "",
+      topic: topicQueryState || "",
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function getJournalistsWithSources(topic: string) {
     try {
+      setTopicQueryState(topic);
       setIsNoJournalistsFound(false);
       setJournalistSources([]);
       setIsLoading(true);
       setError(null);
-      setTopic(values.topic);
+      setTopic(topic);
       const journalists: any = await perigonService.getJournalistsByTopic(
-        values.topic
+        topic
       );
+      console.log("Journalists for topic: ", journalists);
       const allJournalists: Journalist[] = journalists.results;
 
       const fetchSourcesPromises: Array<Promise<unknown>> = [];
@@ -100,7 +105,11 @@ export default function Home() {
           offset += 1;
         });
 
-        tempJournalistSources.push({ journalist, sources: tempSources, reach });
+        tempJournalistSources.push({
+          journalist,
+          sources: tempSources,
+          reach,
+        });
       }
 
       if (!tempJournalistSources || tempJournalistSources.length === 0) {
@@ -118,6 +127,17 @@ export default function Home() {
       );
     }
   }
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    await getJournalistsWithSources(values.topic);
+  }
+
+  useEffect(() => {
+    if (topicQueryState && topicQueryState.trim() !== "") {
+      getJournalistsWithSources(topicQueryState);
+      form.setValue("topic", topicQueryState);
+    }
+  }, [topicQueryState]);
 
   const isReady =
     !isLoading &&
