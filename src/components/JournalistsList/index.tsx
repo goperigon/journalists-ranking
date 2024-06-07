@@ -37,7 +37,10 @@ export function JournalistsList() {
       <ScrollArea className="h-auto rounded-md border w-full">
         <div className="flex flex-col p-4 w-full">
           {journalistSources.map((journalist) => (
-            <JournalistDetails journalist={journalist} />
+            <JournalistDetails
+              key={journalist.journalist.id}
+              journalist={journalist}
+            />
           ))}
         </div>
       </ScrollArea>
