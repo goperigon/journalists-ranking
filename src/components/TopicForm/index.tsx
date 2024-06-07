@@ -239,38 +239,6 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
                   </Command>
                 </PopoverContent>
               </Popover>
-              {/* <Command>
-                <CommandInput
-                  placeholder="Search topic..."
-                  defaultValue={topicQueryState || undefined}
-                />
-                <CommandList className="h-44">
-                  <CommandEmpty>No topic found.</CommandEmpty>
-                  {true && (
-                    <CommandGroup>
-                      {topics.map((topic) => (
-                        <CommandItem
-                          value={topic.name}
-                          key={topic.name}
-                          onSelect={() => {
-                            form.setValue("topic", topic.name);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              topic.name === field.value
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          {topic.name}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  )}
-                </CommandList>
-              </Command> */}
               <FormDescription>
                 This is the topic that will be used for ranking.
               </FormDescription>
@@ -279,8 +247,9 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
           )}
         />
         <div className="flex justify-center">
-          <Button type="submit">
-            Search {isLoading && <LoadingSpinner size={14} className="ml-1" />}
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Searching" : "Search"}{" "}
+            {isLoading && <LoadingSpinner size={14} className="ml-1" />}
           </Button>
         </div>
       </form>
