@@ -24,7 +24,7 @@ export default {
       .json();
   },
 
-  async getAllTopics(): Promise<PerigonInternalResponse> {
+  async getAllTopics(): Promise<PerigonInternalResponse<Topic[]>> {
     return wretch
       .get("https://api.goperigon.com/v1/topics/all?size=1000")
       .json();

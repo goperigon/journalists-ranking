@@ -30,6 +30,7 @@ import { Journalist } from "@/types/journalist";
 import { Source } from "@/types/source";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryState } from "nuqs";
+import { withCachedTopics } from "@/lib/cachedTopics";
 
 interface TopicFormProps<T extends z.ZodType> {}
 
@@ -70,11 +71,12 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
 
   const fetchAllTopics = async () => {
     setIsTopicsLoading(true);
-    const topicsResponse = await perigonService.getAllTopics();
+    const topics = await withCachedTopics(perigonService.getAllTopics);
+    console.log("Topics: ", topics);
     setIsTopicsLoading(false);
-    if (topicsResponse.data) {
+    if (topics) {
       // setCachedTopics(topicsResponse.data);
-      return setTopics(topicsResponse.data);
+      return setTopics(topics);
     } else return [];
   };
 

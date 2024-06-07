@@ -4,7 +4,7 @@ export interface PerigonResponse {
   status: number;
 }
 
-export interface PerigonInternalResponse {
+export interface PerigonInternalResponse<T = any> {
   total: number;
-  data: any[];
+  data: T;
 }
