@@ -1,4 +1,5 @@
 import wretch from "@/lib/wretch";
+import { PerigonInternalResponse } from "@/types/perigonResponse";
 
 export default {
   async getJournalistsByTopic(topic: string) {
@@ -20,6 +21,12 @@ export default {
   async getSourceByDomain(domain: string) {
     return wretch
       .get(`https://api.goperigon.com/v1/sources?domain=${domain}`)
+      .json();
+  },
+
+  async getAllTopics(): Promise<PerigonInternalResponse> {
+    return wretch
+      .get("https://api.goperigon.com/v1/topics/all?size=1000")
       .json();
   },
 };

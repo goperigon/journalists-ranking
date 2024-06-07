@@ -19,7 +19,7 @@ export function JournalistInfo(props: JournalistInfoProps) {
   );
 
   return (
-    <div className="flex pt-4 pb-10 flex-col gap-y-2">
+    <div className="flex px-6 pt-4 pb-10 flex-col gap-y-2">
       <span className="text-lg font-semibold">
         Title: {journalistSource.journalist.title}
       </span>
@@ -44,15 +44,18 @@ export function JournalistInfo(props: JournalistInfoProps) {
           </div>
         ))}
       </div>
-      <div className="flex gap-x-2 items-center">
-        <span className="text-lg font-semibold">Top Topics:</span>
+      <div className="flex gap-x-1.5 items-center flex-wrap">
+        <span className="text-lg font-semibold mr-2">Top Topics:</span>
         {journalistSource.journalist.topTopics.map((topic, idx) => (
-          <Link
-            href={`?topic=${topic.name}`}
-            className="text-blue-400 hover:underline"
-          >
-            <span>{topic.name}</span>
-          </Link>
+          <>
+            <Link
+              href={`?topic=${topic.name}`}
+              className="text-blue-400 hover:underline"
+            >
+              <span className="text-sm text-nowrap">{topic.name}</span>
+            </Link>
+            <span className="text-gray-400 text-xs">•</span>
+          </>
         ))}
       </div>
     </div>

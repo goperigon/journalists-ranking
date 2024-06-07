@@ -5,29 +5,37 @@ import { create } from "zustand";
 
 interface AppState {
   topic: string;
+  topics: any[];
   isLoading: boolean;
+  isTopicsLoading: boolean;
   isNoJournalistsFound: boolean;
   error: string | null;
   journalistSources: JournalistSource[];
   setTopic: (topic: string) => void;
+  setTopics: (topics: any[]) => void;
   setIsLoading: (isLoading: boolean) => void;
   setIsNoJournalistsFound: (isNoJournalistsFound: boolean) => void;
   setError: (error: string | null) => void;
   setJournalistSources: (journalistSources: JournalistSource[]) => void;
+  setIsTopicsLoading: (isTopicsLoading: boolean) => void;
 }
 
 // Create the Zustand store with typings
 export const useAppStore = create<AppState>((set) => ({
   topic: "",
+  topics: [],
   isLoading: false,
+  isTopicsLoading: true,
   isNoJournalistsFound: false,
   error: null,
   journalistSources: [],
   setTopic: (topic: string) => set({ topic }),
+  setTopics: (topics: any[]) => set({ topics }),
   setIsLoading: (isLoading: boolean) => set({ isLoading }),
   setIsNoJournalistsFound: (isNoJournalistsFound: boolean) =>
     set({ isNoJournalistsFound }),
   setError: (error: string | null) => set({ error }),
   setJournalistSources: (journalistSources: JournalistSource[]) =>
     set({ journalistSources }),
+  setIsTopicsLoading: (isTopicsLoading: boolean) => set({ isTopicsLoading }),
 }));
