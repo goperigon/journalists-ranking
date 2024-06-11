@@ -4,7 +4,7 @@ import { PerigonInternalResponse } from "@/types/perigonResponse";
 export default {
   async getJournalistsByTopic(topic: string) {
     return wretch
-      .get(`https://api.goperigon.com/v1/journalists?topic=${topic}`)
+      .get(`https://api.goperigon.com/v1/journalists?topic=${topic}&size=100`)
       .json();
   },
 
