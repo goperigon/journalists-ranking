@@ -28,6 +28,7 @@ export function JournalistsView() {
 
   return (
     <>
+      {isReady && <JournalistsList />}
       <div className="flex flex-col mt-10">
         {!isLoading && !error && isNoJournalistsFound && (
           <p className="text-lg font-semibold text-center text-red-500">
@@ -40,10 +41,11 @@ export function JournalistsView() {
           </p>
         )}
         {!isLoading && journalistSources.length > 0 && (
-          <JournalistsReachChart journalistSources={journalistSources} />
+          <JournalistsReachChart
+            journalistSources={journalistSources.slice(0, 9)}
+          />
         )}
       </div>
-      {isReady && <JournalistsList />}
     </>
   );
 }
