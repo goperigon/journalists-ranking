@@ -8,7 +8,7 @@ import SettingsDialog from "@/components/settingsDialog";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Journalists Ranking by Reach",
+  title: "Journalist Explorer | Perigon",
   description:
     "Rank journalists by their reach based on what sources they post on - Powered by Perigon",
 };

@@ -17,7 +17,7 @@ import {
   CollapsibleTrigger,
 } from "../ui/collapsible";
 import numeral from "numeral";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { JournalistDetails } from "../JournalistDetails";
 
 export function JournalistsList() {
@@ -29,6 +29,11 @@ export function JournalistsList() {
 
   const journalistSources = useAppStore((state) => state.journalistSources);
 
+  const sortedJournalistSources = useMemo(
+    () => journalistSources.sort((a, b) => b.reach - a.reach),
+    [journalistSources]
+  );
+
   return (
     <section className="flex flex-col w-full mt-12">
       <div className="flex items-center justify-between space-x-4 px-4 mb-4">
@@ -36,7 +41,7 @@ export function JournalistsList() {
       </div>
       <ScrollArea className="rounded-md border w-full h-[40rem]">
         <div className="flex flex-col p-4 w-full overflow-x-auto">
-          {journalistSources.map((journalist) => (
+          {sortedJournalistSources.map((journalist) => (
             <JournalistDetails
               key={journalist.journalist.id}
               journalist={journalist}
