@@ -2,6 +2,7 @@ import { JournalistSource } from "@/types/journalistSource";
 import Link from "next/link";
 import numeral from "numeral";
 import { useMemo } from "react";
+import { SocialIcons } from "./socialIcons";
 
 interface JournalistInfoProps {
   journalistSource: JournalistSource;
@@ -20,11 +21,15 @@ export function JournalistInfo(props: JournalistInfoProps) {
 
   return (
     <div className="flex px-6 pt-4 pb-10 flex-col gap-y-2">
-      <span className="text-lg font-semibold">
+      <SocialIcons
+        journalist={journalistSource.journalist}
+        className="flex lg:hidden mb-4"
+      />
+      <span className="lg:text-lg font-semibold">
         Title: {journalistSource.journalist.title}
       </span>
       <div className="flex flex-col">
-        <span className="text-lg font-semibold">Top Sources:</span>
+        <span className="lg:text-lg font-semibold">Top Sources:</span>
         {sortedSourcesByMonthlyVisits.map((source, idx) => (
           <div className="flex gap-x-4" key={source.id || idx}>
             {/* <span className="text-base font-normal">{source.name}</span> */}
@@ -33,19 +38,19 @@ export function JournalistInfo(props: JournalistInfoProps) {
               href={`https://${source.domain}`}
               target="_blank"
             >
-              <span className="text-base font-normal">
+              <span className="text-sm lg:text-base font-normal">
                 {source.name || source.domain || "(N/A)"}{" "}
                 {source.name ? `(${source.domain})` : ""}
               </span>
             </a>
-            <span className="text-base font-bold">
+            <span className="text-sm lg:text-base font-bold">
               {numeral(source.monthlyVisits).format("0.0a")}
             </span>
           </div>
         ))}
       </div>
       <div className="flex gap-x-1.5 items-center flex-wrap">
-        <span className="text-lg font-semibold mr-2">Top Topics:</span>
+        <span className="lg:text-lg font-semibold mr-2">Top Topics:</span>
         {journalistSource.journalist.topTopics.map((topic, idx) => (
           <>
             <Link

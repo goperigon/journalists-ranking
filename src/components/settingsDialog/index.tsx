@@ -59,7 +59,7 @@ export default function SettingsDialog() {
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex flex-row justify-end gap-x-2">
             <DialogClose>
               <Button type="submit">Save</Button>
             </DialogClose>

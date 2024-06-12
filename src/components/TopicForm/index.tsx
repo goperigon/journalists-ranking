@@ -120,7 +120,7 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
 
           tempSources.push(targetSource);
           reach +=
-            typeof targetSource.monthlyVisits === "number"
+            typeof targetSource?.monthlyVisits === "number"
               ? targetSource.monthlyVisits
               : 0;
 
@@ -143,6 +143,7 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
       setIsLoading(false);
     } catch (err) {
       setIsLoading(false);
+      console.log("Error: ", err);
       setError(
         "Unexpected error occurred! Please make sure you have a valid Perigon API Key"
       );

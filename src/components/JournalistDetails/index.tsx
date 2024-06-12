@@ -21,6 +21,7 @@ import { Journalist } from "@/types/journalist";
 import { JournalistSource } from "@/types/journalistSource";
 import { useState } from "react";
 import { JournalistInfo } from "./journalistInfo";
+import { SocialIcons } from "./socialIcons";
 
 interface JournalistDetailsProps {
   journalist: JournalistSource;
@@ -39,9 +40,9 @@ export function JournalistDetails(props: JournalistDetailsProps) {
       <CollapsibleTrigger asChild>
         <div
           key={journalist.journalist.id}
-          className="flex justify-between text-xl gap-x-4 w-full items-center"
+          className="flex justify-between text-xl gap-x-1 lg:gap-x-4 w-full items-center"
         >
-          <div className="flex items-center gap-x-7">
+          <div className="flex items-center gap-x-2 lg:gap-x-7">
             <Button variant="ghost" size="sm" className="w-9 p-0">
               {!isOpen && <ChevronDown className="h-4 w-4" />}
               {isOpen && <ChevronUp className="h-4 w-4" />}
@@ -51,43 +52,17 @@ export function JournalistDetails(props: JournalistDetailsProps) {
             )}
             <Link
               href={journalist.journalist.websiteUrl || "#"}
-              className="hover:underline font-semibold"
+              className="hover:underline font-semibold text-sm lg:text-base"
             >
               {journalist.journalist.name}
             </Link>
-            <span className="flex gap-x-2">
-              <Button size="icon" variant="outline" asChild>
-                <Link
-                  href={`https://x.com/${journalist.journalist.twitterHandle}`}
-                >
-                  <Twitter />
-                </Link>
-              </Button>
-              {journalist.journalist.linkedinUrl && (
-                <Button asChild size="icon" variant="outline">
-                  <Link href={journalist.journalist.linkedinUrl}>
-                    <Linkedin />
-                  </Link>
-                </Button>
-              )}
-              {journalist.journalist.facebookUrl && (
-                <Button asChild size="icon" variant="outline">
-                  <Link href={journalist.journalist.facebookUrl}>
-                    <Facebook />
-                  </Link>
-                </Button>
-              )}
-              {journalist.journalist.blogUrl && (
-                <Button asChild size="icon" variant="outline">
-                  <Link href={journalist.journalist.blogUrl}>
-                    <Globe2 />
-                  </Link>
-                </Button>
-              )}
-            </span>
+            <SocialIcons
+              journalist={journalist.journalist}
+              className="hidden lg:flex"
+            />
           </div>
-          <div className="flex gap-x-2 font-semibold text-blue-500">
-            <p>Topic reach:</p>
+          <div className="flex gap-x-2 text-xs md:text-sm lg:text-base font-semibold text-blue-500">
+            <p>Reach:</p>
             <p>{numeral(journalist.reach).format("0.0a").toUpperCase()}</p>
           </div>
         </div>

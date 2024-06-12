@@ -61,7 +61,8 @@ export function JournalistsReachChart(props: JournalistsReachChartProps) {
   );
 
   return (
-    <div className="flex w-full max-w-screen-lg h-[550px]">
+    <div className="flex-col w-full max-w-screen-lg h-[550px] hidden lg:flex">
+      <h2 className="text-lg font-semibold mb-4">Top 10 Journalists Ranking</h2>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={sortedJournalistSources}

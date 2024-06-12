@@ -30,12 +30,12 @@ export function JournalistsList() {
   const journalistSources = useAppStore((state) => state.journalistSources);
 
   return (
-    <section className="flex flex-col w-full">
+    <section className="flex flex-col w-full mt-12">
       <div className="flex items-center justify-between space-x-4 px-4 mb-4">
         <h3 className="font-semibold text-xl">Journalists List</h3>
       </div>
       <ScrollArea className="rounded-md border w-full h-[40rem]">
-        <div className="flex flex-col p-4 w-full">
+        <div className="flex flex-col p-4 w-full overflow-x-auto">
           {journalistSources.map((journalist) => (
             <JournalistDetails
               key={journalist.journalist.id}

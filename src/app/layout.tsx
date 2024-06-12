@@ -23,8 +23,8 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
-          enableSystem
+          defaultTheme="system"
+          enableSystem={false}
           disableTransitionOnChange
         >
           <div className="flex px-7 py-5 gap-x-4 flex-row-reverse">
