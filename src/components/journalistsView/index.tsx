@@ -10,21 +10,15 @@ export function JournalistsView() {
     (state) => state.isNoJournalistsFound
   );
   const error = useAppStore((state) => state.error);
-  const journalistSources = useAppStore((state) => state.journalistSources);
-  const setIsLoading = useAppStore((state) => state.setIsLoading);
-  const setIsNoJournalistsFound = useAppStore(
-    (state) => state.setIsNoJournalistsFound
-  );
-  const setError = useAppStore((state) => state.setError);
-  const setJournalistSources = useAppStore(
-    (state) => state.setJournalistSources
+  const journalistSourcesWithArticles = useAppStore(
+    (state) => state.journalistSourcesWithArticles
   );
 
   const isReady =
     !isLoading &&
     !error &&
     !isNoJournalistsFound &&
-    journalistSources.length !== 0;
+    journalistSourcesWithArticles.length !== 0;
 
   return (
     <>
@@ -40,9 +34,9 @@ export function JournalistsView() {
             {error}
           </p>
         )}
-        {!isLoading && journalistSources.length > 0 && (
+        {!isLoading && journalistSourcesWithArticles.length > 0 && (
           <JournalistsReachChart
-            journalistSources={journalistSources.slice(0, 9)}
+            journalistSourcesWithArticles={journalistSourcesWithArticles}
           />
         )}
       </div>

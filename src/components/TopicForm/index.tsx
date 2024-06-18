@@ -23,7 +23,7 @@ import {
 import { LoadingSpinner } from "../LoadingSpinner";
 import { useForm } from "react-hook-form";
 import perigonService from "@/services/perigonService";
-import { z } from "zod";
+import { promise, z } from "zod";
 import { useAppStore } from "@/stores/appStore";
 import { useEffect } from "react";
 import { Journalist } from "@/types/journalist";
@@ -31,6 +31,10 @@ import { Source } from "@/types/source";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryState } from "nuqs";
 import { withCachedTopics } from "@/lib/cachedTopics";
+import app from "@/config/app";
+import { JournalistSource } from "@/types/journalistSource";
+import { filterJournalistsByArticles } from "@/lib/filters";
+import { Article } from "@/types/article";
 
 interface TopicFormProps<T extends z.ZodType> {}
 
@@ -43,14 +47,16 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
     (state) => state.isNoJournalistsFound
   );
   const error = useAppStore((state) => state.error);
-  const journalistSources = useAppStore((state) => state.journalistSources);
+  const journalistSourcesWithArticles = useAppStore(
+    (state) => state.journalistSourcesWithArticles
+  );
   const setIsLoading = useAppStore((state) => state.setIsLoading);
   const setIsNoJournalistsFound = useAppStore(
     (state) => state.setIsNoJournalistsFound
   );
   const setError = useAppStore((state) => state.setError);
-  const setJournalistSources = useAppStore(
-    (state) => state.setJournalistSources
+  const setJournalistSourcesWithArticles = useAppStore(
+    (state) => state.setJournalistSourcesWithArticles
   );
   const setTopics = useAppStore((state) => state.setTopics);
   const topics = useAppStore((state) => state.topics);
@@ -60,12 +66,14 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
     topic: z.string().min(2, {
       message: "Topic must be at least 2 characters.",
     }),
+    lastPostPeriod: z.string(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       topic: topicQueryState || "",
+      lastPostPeriod: app.lastPostFilterValues[0].label,
     },
   });
 
@@ -81,7 +89,6 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
   };
 
   async function getJournalistsWithSources(topic: string) {
-    setIsLoading(true);
     try {
       const journalists: any = await perigonService.getJournalistsByTopic(
         topic
@@ -135,19 +142,54 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
       }
 
       if (!tempJournalistSources || tempJournalistSources.length === 0) {
-        setIsNoJournalistsFound(true);
+        // setIsNoJournalistsFound(true);
+        return null;
       } else {
-        setJournalistSources(tempJournalistSources);
+        // setJournalistSourcesWithArticles(tempJournalistSources);
+        return tempJournalistSources;
       }
-
-      setIsLoading(false);
     } catch (err) {
-      setIsLoading(false);
       console.log("Error: ", err);
       setError(
         "Unexpected error occurred! Please make sure you have a valid Perigon API Key"
       );
+      return null;
     }
+  }
+
+  async function fetchJournalistsArticles(
+    topic: string,
+    lastPostPeriod: string,
+    journalistSources: JournalistSource[]
+  ): Promise<Array<JournalistSource & { articles: Article[] }> | null> {
+    const promises = [];
+    for (const journalistSource of journalistSources) {
+      const period = app.lastPostFilterValues.find(
+        (item) => item.label === lastPostPeriod
+      )?.period;
+
+      const journalistPromise = perigonService.getJournalistArticlesForTopic(
+        journalistSource.journalist.id,
+        topic,
+        period?.from,
+        period?.to
+      );
+      promises.push(journalistPromise.then((value) => value.articles));
+    }
+
+    const results = await Promise.all(promises);
+
+    let journalistSourcesWithArticles = null;
+
+    for (const [idx, journalistSource] of journalistSources.entries()) {
+      const journalistArticles = results[idx];
+    }
+
+    journalistSourcesWithArticles = filterJournalistsByArticles(
+      journalistSources,
+      results
+    );
+    return journalistSourcesWithArticles;
   }
 
   useEffect(() => {
@@ -155,11 +197,29 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
   }, []);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
     setTopicQueryState(values.topic);
     setIsNoJournalistsFound(false);
-    setJournalistSources([]);
+    setJournalistSourcesWithArticles([]);
     setError(null);
-    await getJournalistsWithSources(values.topic);
+    const internalJournalistSources = await getJournalistsWithSources(
+      values.topic
+    );
+
+    if (internalJournalistSources) {
+      const internalJournalistSourcesWithArticles =
+        await fetchJournalistsArticles(
+          values.topic,
+          values.lastPostPeriod,
+          internalJournalistSources
+        );
+
+      if (internalJournalistSourcesWithArticles)
+        setJournalistSourcesWithArticles(internalJournalistSourcesWithArticles);
+      else setIsNoJournalistsFound(true);
+    }
+
+    setIsLoading(false);
   }
 
   useEffect(() => {
@@ -242,6 +302,76 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
               </Popover>
               <FormDescription>
                 This is the topic that will be used for ranking.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="lastPostPeriod"
+          render={({ field }) => (
+            <FormItem className="flex flex-col w-full">
+              <FormLabel>Last Post</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className={cn(
+                        "w-full justify-between",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value
+                        ? app.lastPostFilterValues.find(
+                            (lastPostFilter) =>
+                              lastPostFilter.label === field.value
+                          )?.label
+                        : "Select Topic"}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-96! p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Search topic..." />
+                    <CommandList>
+                      <CommandEmpty>No date period found.</CommandEmpty>
+                      {topics && (
+                        <CommandGroup>
+                          {app.lastPostFilterValues.map((lastPostFilter) => (
+                            <CommandItem
+                              value={lastPostFilter.label}
+                              key={lastPostFilter.label}
+                              onSelect={() => {
+                                form.setValue(
+                                  "lastPostPeriod",
+                                  lastPostFilter.label
+                                );
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  lastPostFilter.label === field.value
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {lastPostFilter.label}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      )}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <FormDescription>
+                This is the journalist's latest published post time (for the
+                selected topic).
               </FormDescription>
               <FormMessage />
             </FormItem>

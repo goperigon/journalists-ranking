@@ -1,5 +1,9 @@
 import wretch from "@/lib/wretch";
-import { PerigonInternalResponse } from "@/types/perigonResponse";
+import { Article } from "@/types/article";
+import {
+  PerigonArticlesResponse,
+  PerigonInternalResponse,
+} from "@/types/perigonResponse";
 
 export default {
   async getJournalistsByTopic(topic: string) {
@@ -27,6 +31,20 @@ export default {
   async getAllTopics(): Promise<PerigonInternalResponse<Topic[]>> {
     return wretch
       .get("https://api.goperigon.com/v1/topics/all?size=1000")
+      .json();
+  },
+
+  async getJournalistArticlesForTopic(
+    journalistId: string,
+    topic: string,
+    from?: string,
+    to?: string
+  ): Promise<PerigonArticlesResponse> {
+    return wretch
+      .query({ journalistId, topic, from, to })
+      .get(
+        `https://api.goperigon.com/v1/all?journalistId=${journalistId}&topic=${topic}`
+      )
       .json();
   },
 };

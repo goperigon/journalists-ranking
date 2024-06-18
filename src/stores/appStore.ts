@@ -1,3 +1,4 @@
+import { Article } from "@/types/article";
 import { Journalist } from "@/types/journalist";
 import { JournalistSource } from "@/types/journalistSource";
 import { Source } from "@/types/source";
@@ -10,13 +11,19 @@ interface AppState {
   isTopicsLoading: boolean;
   isNoJournalistsFound: boolean;
   error: string | null;
-  journalistSources: JournalistSource[];
+  journalistSourcesWithArticles: Array<
+    JournalistSource & { articles: Article[] }
+  >;
   setTopic: (topic: string) => void;
   setTopics: (topics: any[]) => void;
   setIsLoading: (isLoading: boolean) => void;
   setIsNoJournalistsFound: (isNoJournalistsFound: boolean) => void;
   setError: (error: string | null) => void;
-  setJournalistSources: (journalistSources: JournalistSource[]) => void;
+  setJournalistSourcesWithArticles: (
+    journalistSourcesWithArticles: Array<
+      JournalistSource & { articles: Article[] }
+    >
+  ) => void;
   setIsTopicsLoading: (isTopicsLoading: boolean) => void;
 }
 
@@ -28,14 +35,14 @@ export const useAppStore = create<AppState>((set) => ({
   isTopicsLoading: true,
   isNoJournalistsFound: false,
   error: null,
-  journalistSources: [],
+  journalistSourcesWithArticles: [],
   setTopic: (topic: string) => set({ topic }),
   setTopics: (topics: any[]) => set({ topics }),
   setIsLoading: (isLoading: boolean) => set({ isLoading }),
   setIsNoJournalistsFound: (isNoJournalistsFound: boolean) =>
     set({ isNoJournalistsFound }),
   setError: (error: string | null) => set({ error }),
-  setJournalistSources: (journalistSources: JournalistSource[]) =>
-    set({ journalistSources }),
+  setJournalistSourcesWithArticles: (journalistSourcesWithArticles) =>
+    set({ journalistSourcesWithArticles }),
   setIsTopicsLoading: (isTopicsLoading: boolean) => set({ isTopicsLoading }),
 }));

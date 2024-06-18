@@ -21,17 +21,19 @@ import { useMemo, useState } from "react";
 import { JournalistDetails } from "../JournalistDetails";
 
 export function JournalistsList() {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const setJournalistSources = useAppStore(
-    (state) => state.setJournalistSources
+  const journalistSourcesWithArticles = useAppStore(
+    (state) => state.journalistSourcesWithArticles
   );
 
-  const journalistSources = useAppStore((state) => state.journalistSources);
+  const filteredJournalistSources = useMemo(
+    () =>
+      journalistSourcesWithArticles.filter((item) => item.articles.length > 0),
+    [journalistSourcesWithArticles]
+  );
 
   const sortedJournalistSources = useMemo(
-    () => journalistSources.sort((a, b) => b.reach - a.reach),
-    [journalistSources]
+    () => filteredJournalistSources.sort((a, b) => b.reach - a.reach),
+    [filteredJournalistSources]
   );
 
   return (

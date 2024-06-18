@@ -17,13 +17,13 @@ import { useTheme } from "next-themes";
 import { useConfig } from "@/hooks/use-config";
 import { themes } from "@/lib/theme";
 import { useMemo } from "react";
+import { JournalistSource } from "@/types/journalistSource";
+import { Article } from "@/types/article";
 
 interface JournalistsReachChartProps {
-  journalistSources: {
-    journalist: Journalist;
-    sources: Source[];
-    reach: number;
-  }[];
+  journalistSourcesWithArticles: Array<
+    JournalistSource & { articles: Article[] }
+  >;
 }
 
 const JournalistInfoToolTipContent = ({ active, payload, label }: any) => {
@@ -53,11 +53,17 @@ export function JournalistsReachChart(props: JournalistsReachChartProps) {
   const [config] = useConfig();
   const theme = themes.find((theme) => theme.name === config.theme);
 
-  const { journalistSources } = props;
+  const { journalistSourcesWithArticles } = props;
+
+  const filteredJournalistSources = useMemo(
+    () =>
+      journalistSourcesWithArticles.filter((item) => item.articles.length > 0),
+    [journalistSourcesWithArticles]
+  );
 
   const sortedJournalistSources = useMemo(
-    () => journalistSources.sort((a, b) => b.reach - a.reach),
-    [journalistSources]
+    () => filteredJournalistSources.sort((a, b) => b.reach - a.reach),
+    [filteredJournalistSources]
   );
 
   return (
@@ -65,7 +71,7 @@ export function JournalistsReachChart(props: JournalistsReachChartProps) {
       <h2 className="text-lg font-semibold mb-4">Top 10 Journalists Ranking</h2>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
-          data={sortedJournalistSources}
+          data={sortedJournalistSources.slice(0, 9)}
           margin={{
             top: 5,
             right: 30,

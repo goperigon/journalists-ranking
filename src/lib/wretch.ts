@@ -1,6 +1,6 @@
 import wretch, { ConfiguredMiddleware } from "wretch";
 import { getApiKey } from "./apiKey";
-import { retry } from "wretch/middlewares";
+import QueryStringAddon from "wretch/addons/queryString";
 
 export const manipulateHeaders =
   (callback: (headers: Headers) => Headers): ConfiguredMiddleware =>
@@ -27,4 +27,6 @@ const delayMiddleware =
     return new Promise((res) => setTimeout(() => res(next(url, opts)), delay));
   };
 
-export default wretch().middlewares([addDefaultHeaders()]);
+export default wretch()
+  .addon(QueryStringAddon)
+  .middlewares([addDefaultHeaders()]);
