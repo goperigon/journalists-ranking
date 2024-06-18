@@ -40,6 +40,8 @@ interface TopicFormProps<T extends z.ZodType> {}
 
 export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
   const [topicQueryState, setTopicQueryState] = useQueryState("topic");
+  const [lastPostPeriodQueryState, setLastPostPeriodQueryState] =
+    useQueryState("lastPost");
 
   const isLoading = useAppStore((state) => state.isLoading);
   const isTopicsLoading = useAppStore((state) => state.isTopicsLoading);
@@ -73,7 +75,8 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       topic: topicQueryState || "",
-      lastPostPeriod: app.lastPostFilterValues[0].label,
+      lastPostPeriod:
+        lastPostPeriodQueryState || app.lastPostFilterValues[0].label,
     },
   });
 
@@ -195,21 +198,16 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
     fetchAllTopics();
   }, []);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function fetchAllData(topic: string, lastPostPeriod: string) {
     setIsLoading(true);
-    setTopicQueryState(values.topic);
-    setIsNoJournalistsFound(false);
-    setJournalistSourcesWithArticles([]);
-    setError(null);
-    const internalJournalistSources = await getJournalistsWithSources(
-      values.topic
-    );
+
+    const internalJournalistSources = await getJournalistsWithSources(topic);
 
     if (internalJournalistSources) {
       const internalJournalistSourcesWithArticles =
         await fetchJournalistsArticles(
-          values.topic,
-          values.lastPostPeriod,
+          topic,
+          lastPostPeriod,
           internalJournalistSources
         );
 
@@ -221,12 +219,27 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
     setIsLoading(false);
   }
 
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setTopicQueryState(values.topic);
+    setLastPostPeriodQueryState(values.lastPostPeriod);
+    setIsNoJournalistsFound(false);
+    setJournalistSourcesWithArticles([]);
+    setError(null);
+
+    await fetchAllData(values.topic, values.lastPostPeriod);
+  }
+
   useEffect(() => {
-    if (topicQueryState && topicQueryState.trim() !== "") {
-      getJournalistsWithSources(topicQueryState);
+    if (
+      lastPostPeriodQueryState &&
+      lastPostPeriodQueryState.trim() !== "" &&
+      topicQueryState &&
+      topicQueryState.trim() !== ""
+    ) {
+      fetchAllData(topicQueryState, lastPostPeriodQueryState);
       form.setValue("topic", topicQueryState);
     }
-  }, [topicQueryState]);
+  }, [topicQueryState, lastPostPeriodQueryState]);
 
   if (isTopicsLoading)
     return (
