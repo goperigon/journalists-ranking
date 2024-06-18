@@ -1,13 +1,5 @@
 "use client";
-import {
-  ChevronDown,
-  ChevronUp,
-  ChevronsUpDown,
-  Facebook,
-  Globe2,
-  Linkedin,
-  Twitter,
-} from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   Collapsible,
@@ -17,12 +9,12 @@ import {
 import Link from "next/link";
 import numeral from "numeral";
 import { Separator } from "../ui/separator";
-import { Journalist } from "@/types/journalist";
 import { JournalistSource } from "@/types/journalistSource";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { JournalistInfo } from "./journalistInfo";
 import { SocialIcons } from "./socialIcons";
 import { Article } from "@/types/article";
+import { useAppStore } from "@/stores/appStore";
 
 interface JournalistDetailsProps {
   journalist: JournalistSource & { articles: Article[] };
@@ -31,6 +23,15 @@ interface JournalistDetailsProps {
 export function JournalistDetails(props: JournalistDetailsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { journalist } = props;
+
+  const ignoreNoArticleSources = useAppStore(
+    (state) => state.ignoreNoArticleSources
+  );
+
+  const sortedSourcesByMonthlyVisits = useMemo(
+    () => journalist.sources.sort((a, b) => b.monthlyVisits - a.monthlyVisits),
+    [journalist.sources]
+  );
 
   return (
     <Collapsible
@@ -70,7 +71,12 @@ export function JournalistDetails(props: JournalistDetailsProps) {
       </CollapsibleTrigger>
       <Separator className="my-2" />
       <CollapsibleContent className="flex flex-col">
-        <JournalistInfo journalistSource={journalist} />
+        <JournalistInfo
+          journalistSource={{
+            ...journalist,
+            sources: sortedSourcesByMonthlyVisits,
+          }}
+        />
       </CollapsibleContent>
     </Collapsible>
   );

@@ -19,6 +19,7 @@ import { themes } from "@/lib/theme";
 import { useMemo } from "react";
 import { JournalistSource } from "@/types/journalistSource";
 import { Article } from "@/types/article";
+import { useAppStore } from "@/stores/appStore";
 
 interface JournalistsReachChartProps {
   journalistSourcesWithArticles: Array<
@@ -54,6 +55,9 @@ export function JournalistsReachChart(props: JournalistsReachChartProps) {
   const theme = themes.find((theme) => theme.name === config.theme);
 
   const { journalistSourcesWithArticles } = props;
+  const ignoreNoArticleSources = useAppStore(
+    (state) => state.ignoreNoArticleSources
+  );
 
   const filteredJournalistSources = useMemo(
     () =>

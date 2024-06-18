@@ -13,14 +13,6 @@ interface JournalistInfoProps {
 export function JournalistInfo(props: JournalistInfoProps) {
   const { journalistSource } = props;
 
-  const sortedSourcesByMonthlyVisits = useMemo(
-    () =>
-      journalistSource.sources.sort(
-        (a, b) => b.monthlyVisits - a.monthlyVisits
-      ),
-    [journalistSource.sources]
-  );
-
   return (
     <div className="flex px-6 pt-4 pb-10 flex-col gap-y-2">
       <SocialIcons
@@ -32,23 +24,6 @@ export function JournalistInfo(props: JournalistInfoProps) {
       </span>
       <div className="flex flex-col">
         <span className="lg:text-lg font-semibold">Top Sources:</span>
-        {/* {sortedSourcesByMonthlyVisits.map((source, idx) => (
-          <div className="flex gap-x-4" key={source.id || idx}>
-            <a
-              className="text-blue-400 hover:underline"
-              href={`https://${source.domain}`}
-              target="_blank"
-            >
-              <span className="text-sm lg:text-base font-normal">
-                {source.name || source.domain || "(N/A)"}{" "}
-                {source.name ? `(${source.domain})` : ""}
-              </span>
-            </a>
-            <span className="text-sm lg:text-base font-bold">
-              {numeral(source.monthlyVisits).format("0.0a")}
-            </span>
-          </div>
-        ))} */}
         <TopSources journalistSource={journalistSource} />
       </div>
       <div className="flex gap-x-1.5 items-center flex-wrap">

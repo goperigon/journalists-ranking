@@ -14,6 +14,8 @@ interface AppState {
   journalistSourcesWithArticles: Array<
     JournalistSource & { articles: Article[] }
   >;
+  ignoreNoArticleSources: boolean;
+  setIgnoreNoArticleSources: (ignoreNoArticleSources: boolean) => void;
   setTopic: (topic: string) => void;
   setTopics: (topics: any[]) => void;
   setIsLoading: (isLoading: boolean) => void;
@@ -36,6 +38,7 @@ export const useAppStore = create<AppState>((set) => ({
   isNoJournalistsFound: false,
   error: null,
   journalistSourcesWithArticles: [],
+  ignoreNoArticleSources: false,
   setTopic: (topic: string) => set({ topic }),
   setTopics: (topics: any[]) => set({ topics }),
   setIsLoading: (isLoading: boolean) => set({ isLoading }),
@@ -45,4 +48,6 @@ export const useAppStore = create<AppState>((set) => ({
   setJournalistSourcesWithArticles: (journalistSourcesWithArticles) =>
     set({ journalistSourcesWithArticles }),
   setIsTopicsLoading: (isTopicsLoading: boolean) => set({ isTopicsLoading }),
+  setIgnoreNoArticleSources: (ignoreNoArticleSources: boolean) =>
+    set({ ignoreNoArticleSources }),
 }));

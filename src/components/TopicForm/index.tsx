@@ -1,5 +1,5 @@
 "use client";
-import { cn } from "@/lib/utils";
+import { calculateJournalistReach, cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import {
   Form,
@@ -23,18 +23,19 @@ import {
 import { LoadingSpinner } from "../LoadingSpinner";
 import { useForm } from "react-hook-form";
 import perigonService from "@/services/perigonService";
-import { promise, z } from "zod";
+import { z } from "zod";
 import { useAppStore } from "@/stores/appStore";
 import { useEffect } from "react";
 import { Journalist } from "@/types/journalist";
 import { Source } from "@/types/source";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryState } from "nuqs";
+import { useQueryState, parseAsBoolean } from "nuqs";
 import { withCachedTopics } from "@/lib/cachedTopics";
 import app from "@/config/app";
 import { JournalistSource } from "@/types/journalistSource";
 import { filterJournalistsByArticles } from "@/lib/filters";
 import { Article } from "@/types/article";
+import { Checkbox } from "../ui/checkbox";
 
 interface TopicFormProps<T extends z.ZodType> {}
 
@@ -42,6 +43,8 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
   const [topicQueryState, setTopicQueryState] = useQueryState("topic");
   const [lastPostPeriodQueryState, setLastPostPeriodQueryState] =
     useQueryState("lastPost");
+  const [ignoreNoArticleSourcesQuery, setIgnoreNoArticleSourcesQuery] =
+    useQueryState("ignoreNoArticleSources", parseAsBoolean);
 
   const isLoading = useAppStore((state) => state.isLoading);
   const isTopicsLoading = useAppStore((state) => state.isTopicsLoading);
@@ -63,12 +66,16 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
   const setTopics = useAppStore((state) => state.setTopics);
   const topics = useAppStore((state) => state.topics);
   const setIsTopicsLoading = useAppStore((state) => state.setIsTopicsLoading);
+  const setIgnoreNoArticleSources = useAppStore(
+    (state) => state.setIgnoreNoArticleSources
+  );
 
   const formSchema = z.object({
     topic: z.string().min(2, {
       message: "Topic must be at least 2 characters.",
     }),
     lastPostPeriod: z.string(),
+    ignoreNoArticleSources: z.boolean(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -77,6 +84,7 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
       topic: topicQueryState || "",
       lastPostPeriod:
         lastPostPeriodQueryState || app.lastPostFilterValues[0].label,
+      ignoreNoArticleSources: ignoreNoArticleSourcesQuery || false,
     },
   });
 
@@ -198,8 +206,13 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
     fetchAllTopics();
   }, []);
 
-  async function fetchAllData(topic: string, lastPostPeriod: string) {
+  async function fetchAllData(
+    topic: string,
+    lastPostPeriod: string,
+    ignoreNoArticleSources: boolean
+  ) {
     setIsLoading(true);
+    setIgnoreNoArticleSources(ignoreNoArticleSources);
 
     const internalJournalistSources = await getJournalistsWithSources(topic);
 
@@ -211,9 +224,16 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
           internalJournalistSources
         );
 
-      if (internalJournalistSourcesWithArticles)
-        setJournalistSourcesWithArticles(internalJournalistSourcesWithArticles);
-      else setIsNoJournalistsFound(true);
+      if (internalJournalistSourcesWithArticles) {
+        const journalistsWithReach = internalJournalistSourcesWithArticles.map(
+          (item) => ({
+            ...item,
+            reach: calculateJournalistReach(item, ignoreNoArticleSources),
+          })
+        );
+
+        setJournalistSourcesWithArticles(journalistsWithReach);
+      } else setIsNoJournalistsFound(true);
     }
 
     setIsLoading(false);
@@ -222,11 +242,17 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setTopicQueryState(values.topic);
     setLastPostPeriodQueryState(values.lastPostPeriod);
+    setIgnoreNoArticleSourcesQuery(values.ignoreNoArticleSources);
+    setIgnoreNoArticleSources(values.ignoreNoArticleSources);
     setIsNoJournalistsFound(false);
     setJournalistSourcesWithArticles([]);
     setError(null);
 
-    await fetchAllData(values.topic, values.lastPostPeriod);
+    await fetchAllData(
+      values.topic,
+      values.lastPostPeriod,
+      values.ignoreNoArticleSources
+    );
   }
 
   useEffect(() => {
@@ -236,10 +262,17 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
       topicQueryState &&
       topicQueryState.trim() !== ""
     ) {
-      fetchAllData(topicQueryState, lastPostPeriodQueryState);
+      fetchAllData(
+        topicQueryState,
+        lastPostPeriodQueryState,
+        ignoreNoArticleSourcesQuery || false
+      );
       form.setValue("topic", topicQueryState);
+      form.setValue("lastPostPeriod", lastPostPeriodQueryState);
+      if (ignoreNoArticleSourcesQuery !== null)
+        form.setValue("ignoreNoArticleSources", ignoreNoArticleSourcesQuery);
     }
-  }, [topicQueryState, lastPostPeriodQueryState]);
+  }, [topicQueryState, lastPostPeriodQueryState, ignoreNoArticleSourcesQuery]);
 
   if (isTopicsLoading)
     return (
@@ -386,6 +419,30 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
                 selected topic).
               </FormDescription>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="ignoreNoArticleSources"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormControl>
+                <Checkbox
+                  checked={Boolean(field.value)}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>
+                  Exclude sources with zero related articles on the selected
+                  topic
+                </FormLabel>
+                <FormDescription>
+                  This will exclude sources when calculating reach but will
+                  still list the sources labeled as Articles: N/A
+                </FormDescription>
+              </div>
             </FormItem>
           )}
         />
