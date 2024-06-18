@@ -3,9 +3,11 @@ import Link from "next/link";
 import numeral from "numeral";
 import { useMemo } from "react";
 import { SocialIcons } from "./socialIcons";
+import { Article } from "@/types/article";
+import { TopSources } from "./topSources";
 
 interface JournalistInfoProps {
-  journalistSource: JournalistSource;
+  journalistSource: JournalistSource & { articles: Article[] };
 }
 
 export function JournalistInfo(props: JournalistInfoProps) {
@@ -30,9 +32,8 @@ export function JournalistInfo(props: JournalistInfoProps) {
       </span>
       <div className="flex flex-col">
         <span className="lg:text-lg font-semibold">Top Sources:</span>
-        {sortedSourcesByMonthlyVisits.map((source, idx) => (
+        {/* {sortedSourcesByMonthlyVisits.map((source, idx) => (
           <div className="flex gap-x-4" key={source.id || idx}>
-            {/* <span className="text-base font-normal">{source.name}</span> */}
             <a
               className="text-blue-400 hover:underline"
               href={`https://${source.domain}`}
@@ -47,7 +48,8 @@ export function JournalistInfo(props: JournalistInfoProps) {
               {numeral(source.monthlyVisits).format("0.0a")}
             </span>
           </div>
-        ))}
+        ))} */}
+        <TopSources journalistSource={journalistSource} />
       </div>
       <div className="flex gap-x-1.5 items-center flex-wrap">
         <span className="lg:text-lg font-semibold mr-2">Top Topics:</span>

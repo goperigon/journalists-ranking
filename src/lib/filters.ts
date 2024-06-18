@@ -29,3 +29,13 @@ export function filterJournalistsByArticles(
 
   return journalistSourcesWithArticles;
 }
+
+// export function compactJournalistSources(
+//   journalistSourcesWithArticles: Array<
+//     { articles: Article[] } & JournalistSource
+//   >
+// ): Array<{ articles: Article[] } & JournalistSource> {
+
+
+
+// }

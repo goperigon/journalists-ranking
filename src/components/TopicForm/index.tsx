@@ -83,7 +83,6 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
     console.log("Topics: ", topics);
     setIsTopicsLoading(false);
     if (topics) {
-      // setCachedTopics(topicsResponse.data);
       return setTopics(topics);
     } else return [];
   };

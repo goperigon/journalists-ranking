@@ -22,9 +22,10 @@ import { JournalistSource } from "@/types/journalistSource";
 import { useState } from "react";
 import { JournalistInfo } from "./journalistInfo";
 import { SocialIcons } from "./socialIcons";
+import { Article } from "@/types/article";
 
 interface JournalistDetailsProps {
-  journalist: JournalistSource;
+  journalist: JournalistSource & { articles: Article[] };
 }
 
 export function JournalistDetails(props: JournalistDetailsProps) {
