@@ -256,19 +256,16 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
   }
 
   useEffect(() => {
-    if (
-      lastPostPeriodQueryState &&
-      lastPostPeriodQueryState.trim() !== "" &&
-      topicQueryState &&
-      topicQueryState.trim() !== ""
-    ) {
+    if (topicQueryState && topicQueryState.trim() !== "") {
       fetchAllData(
         topicQueryState,
-        lastPostPeriodQueryState,
+        lastPostPeriodQueryState ||
+          (form.formState.defaultValues?.lastPostPeriod as string),
         ignoreNoArticleSourcesQuery || false
       );
       form.setValue("topic", topicQueryState);
-      form.setValue("lastPostPeriod", lastPostPeriodQueryState);
+      if (lastPostPeriodQueryState)
+        form.setValue("lastPostPeriod", lastPostPeriodQueryState);
       if (ignoreNoArticleSourcesQuery !== null)
         form.setValue("ignoreNoArticleSources", ignoreNoArticleSourcesQuery);
     }
