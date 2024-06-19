@@ -13,6 +13,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { Source } from "@/types/source";
 import Link from "next/link";
 import { useAppStore } from "@/stores/appStore";
+import { cn } from "@/lib/utils";
 
 interface TopSourcesProps {
   journalistSource: JournalistSource & { articles: Article[] };
@@ -66,17 +67,19 @@ function SourceCollapsible(props: {
             {numeral(source.monthlyVisits).format("0.0a")}
           </span>
           {ignoreNoArticleSources && isNoSourceArticles && (
-            <span className="text-sm font-regular text-gray-400">
+            <span className="text-sm font-regular dark:text-gray-300 text-gray-500">
               (excluded)
             </span>
           )}
         </div>
       </CollapsibleTrigger>
-      <CollapsibleContent className="lg:px-10">
-        <div className="flex items-center gap-x-1 flex-wrap">
+      <CollapsibleContent className="lg:px-10 text-wrap">
+        <div>
           <span className="text-sm font-semibold">Articles:</span>
           {isNoSourceArticles && (
-            <span className="text-sm text-gray-300">N/A</span>
+            <span className="text-sm dark:text-gray-300 text-gray-500">
+              N/A
+            </span>
           )}
           {sourceArticles.map((article, idx) => (
             <>
@@ -85,9 +88,15 @@ function SourceCollapsible(props: {
                 target="_blank"
                 className="text-blue-400 hover:underline"
               >
-                <span className="text-sm text-nowrap">{article.title}</span>
+                <span className="text-sm text-wrap">{article.title}</span>
               </Link>
-              <span className="text-gray-400 text-xs">•</span>
+              <span
+                className={cn("text-gray-400 text-xs mx-1", {
+                  hidden: idx === sourceArticles.length - 1,
+                })}
+              >
+                •
+              </span>
             </>
           ))}
         </div>
@@ -116,6 +125,7 @@ export function TopSources(props: TopSourcesProps) {
           source={source}
           journalistSource={journalistSource}
           idx={idx}
+          key={idx}
         />
       ))}
     </div>

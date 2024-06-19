@@ -412,8 +412,8 @@ export function TopicForm<T extends z.ZodType>(props: TopicFormProps<T>) {
                 </PopoverContent>
               </Popover>
               <FormDescription>
-                This is the journalist's latest published post time (for the
-                selected topic).
+                This is the journalist&apos;s latest published post time (for
+                the selected topic).
               </FormDescription>
               <FormMessage />
             </FormItem>

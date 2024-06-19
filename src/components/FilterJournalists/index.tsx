@@ -10,11 +10,6 @@ import { useState } from "react";
 
 export function FilterJournalists() {
   const [isOpen, setIsOpen] = useState(false);
-  const setJournalistSources = useAppStore(
-    (state) => state.setJournalistSources
-  );
-
-  const journalistSources = useAppStore((state) => state.journalistSources);
 
   return (
     <section className="flex flex-col">
