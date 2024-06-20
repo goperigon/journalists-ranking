@@ -23,7 +23,6 @@ export function JournalistInfo(props: JournalistInfoProps) {
         Title: {journalistSource.journalist.title}
       </span>
       <div className="flex flex-col">
-        <span className="lg:text-lg font-semibold">Top Sources:</span>
         <TopSources journalistSource={journalistSource} />
       </div>
       <div className="flex gap-x-1.5 items-center flex-wrap">

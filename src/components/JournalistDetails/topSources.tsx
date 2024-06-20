@@ -36,7 +36,7 @@ function SourceCollapsible(props: {
       journalistSource.articles.filter(
         (article) => article.source.domain === source.domain
       ),
-    [journalistSource.articles]
+    [journalistSource.articles, source]
   );
 
   const isNoSourceArticles = !sourceArticles || sourceArticles.length === 0;
@@ -75,7 +75,7 @@ function SourceCollapsible(props: {
       </CollapsibleTrigger>
       <CollapsibleContent className="lg:px-10 text-wrap">
         <div>
-          <span className="text-sm font-semibold">Articles:</span>
+          <span className="text-sm font-semibold mr-2">Articles:</span>
           {isNoSourceArticles && (
             <span className="text-sm dark:text-gray-300 text-gray-500">
               N/A
@@ -105,22 +105,75 @@ function SourceCollapsible(props: {
   );
 }
 
+const TOP_SOURCES_SORT: {
+  [key: string]: {
+    label: string;
+    sort: (
+      journalistSource: JournalistSource & { articles: Article[] }
+    ) => JournalistSource["sources"];
+  };
+} = {
+  Reach: {
+    label: "Reach",
+    sort: (journalistSource: JournalistSource & { articles: Article[] }) => {
+      return journalistSource.sources.sort(
+        (a, b) => b.monthlyVisits - a.monthlyVisits
+      );
+    },
+  },
+  Articles: {
+    label: "Articles",
+    sort: (journalistSource: JournalistSource & { articles: Article[] }) => {
+      return journalistSource.sources.sort((a, b) => {
+        const sourceArticlesA = journalistSource.articles.filter(
+          (article) => article.source.domain === a.domain
+        );
+
+        const sourceArticlesB = journalistSource.articles.filter(
+          (article) => article.source.domain === b.domain
+        );
+
+        return sourceArticlesB.length - sourceArticlesA.length;
+      });
+    },
+  },
+};
+
 export function TopSources(props: TopSourcesProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [sortBy, setSortBy] = useState(TOP_SOURCES_SORT.Reach.label);
 
   const { journalistSource } = props;
 
-  const sortedSourcesByMonthlyVisits = useMemo(
-    () =>
-      journalistSource.sources.sort(
-        (a, b) => b.monthlyVisits - a.monthlyVisits
-      ),
-    [journalistSource.sources]
+  const sortedSources = useMemo(
+    () => TOP_SOURCES_SORT[sortBy].sort(journalistSource),
+    [journalistSource, sortBy]
   );
 
+  function toggleSortBy(sortBy: string) {
+    setSortBy(sortBy);
+  }
+
   return (
-    <div className="mt-2 mb-4">
-      {sortedSourcesByMonthlyVisits.map((source, idx) => (
+    <div className="mb-4">
+      <div className="flex items-center gap-x-1 mb-2">
+        <span className="lg:text-lg font-semibold">Top Sources:</span>
+        <div className="flex text-xs font-medium text-gray-400 dark:text-gray-400">
+          {Object.values(TOP_SOURCES_SORT).map((item, idx) => (
+            <span
+              key={idx}
+              className={cn(
+                "px-2 border-r dark:divide-gray-600 last:border-r-0",
+                { "text-black dark:text-gray-200": sortBy === item.label }
+              )}
+              onClick={toggleSortBy.bind(null, item.label)}
+            >
+              {item.label}
+            </span>
+          ))}
+        </div>
+      </div>
+      {sortedSources.map((source, idx) => (
         <SourceCollapsible
           source={source}
           journalistSource={journalistSource}
