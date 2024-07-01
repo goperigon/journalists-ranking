@@ -40,3 +40,13 @@ export function calculateJournalistReach(
 
   return reach;
 }
+
+export function calculateTotalArticles(
+  journalistSourcesWithArticles: Array<
+    JournalistSource & { articles: Article[] }
+  >
+) {
+  return journalistSourcesWithArticles.reduce((count, item) => {
+    return count + item.articles.length;
+  }, 0);
+}
